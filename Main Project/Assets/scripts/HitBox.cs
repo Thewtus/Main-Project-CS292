@@ -7,6 +7,7 @@ public class HitBox : MonoBehaviour
     [SerializeField] GameManager gameManager;
     public float damage = 1;
     private Player parent;
+    [SerializeField] int ID;
 
     public HitBox(float dmg, int l, int w)
     {
@@ -27,10 +28,12 @@ public class HitBox : MonoBehaviour
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        collision.gameObject.GetComponentInParent<Player>();
-        if (collision.gameObject.tag == "HurtBox" && !collision.gameObject.GetComponentInParent<Player>().Equals(parent))
+        //collision.gameObject.GetComponentInParent<Player>();
+        if (collision.gameObject.tag == "HurtBox" && collision.gameObject.GetComponentInParent<Player>().getPlayerID() != ID)
         {
-            EventManager.instance.e_hit.Invoke(damage);
+            //Debug.Log("INVOKE");
+            //EventManager.instance.e_hit.Invoke(damage);
+            collision.gameObject.GetComponentInParent<Player>().get_hit(damage);
         }
     }
 
@@ -49,5 +52,6 @@ public class HitBox : MonoBehaviour
         damage = d;
         transform.localScale = new Vector3(l, w, 1);
         parent = p;
+        ID = parent.getPlayerID();
     }
 }

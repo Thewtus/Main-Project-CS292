@@ -2,40 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    enum ThisPlayer
-    {
-        player1,
-        player2
-    }
-    [SerializeField] float speed = 5;
-    [SerializeField] int TEMP_defThisPlayer;
+    [SerializeField] protected float speed = 5;
+    [SerializeField] int playerID;
     [SerializeField] GameObject hitbox;
-
-    ThisPlayer thePlayer;
-    float xMin, xMax;
+    [SerializeField] GameManager gameManager;
+    protected float xMin, xMax;
     //states
-    bool isActionable = true;
-    bool isAttacking, isBlocking, isStun, isRecover, isDown, isGrounded;
+    protected bool isActionable = true;
+    protected bool isAttacking, isBlocking, isStun, isRecover, isDown;
 
-    private float atkTimer = 0;
+    private Animator anim;
+    float xD;
+
+    GameObject atkBox1;
+
+    float stunTimer;
     // Start is called before the first frame update
     void Start()
     {
         //maximum boundaries for ship movement
         xMin = Camera.main.ViewportToWorldPoint(new Vector3(.05f, 0, 0)).x;
         xMax = Camera.main.ViewportToWorldPoint(new Vector3(.95f, 0, 0)).x;
-        setPlayer(TEMP_defThisPlayer);
+
+        anim = gameObject.GetComponent<Animator>();
+
+        EventManager.instance.e_hit.AddListener(get_hit);
+
+        gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
         float xDirection = Input.GetAxis("Horizontal");
-
         //movement:
         if(isActionable)
             transform.position += new Vector3(xDirection, 0, 0) * Time.deltaTime * speed;
@@ -44,40 +48,41 @@ public class Player : MonoBehaviour
         { //collision with sides
             transform.position -= new Vector3(xDirection, 0, 0) * Time.deltaTime * speed;
         }
-
-
+        
+        
+        isBlocking = xDirection <= 0; //checking for blocking, if moving backwards, block
+        xD = xDirection;
+        //Debug.Log(isBlocking + " " + xDirection);
+        if(Input.GetButtonDown("Fire0") && isActionable)
+        {
+            isAttacking = true;
+            isActionable = false;
+            anim.Play("atk0");
+        }
         if(Input.GetButtonDown("Fire1") && isActionable)
         {
             isAttacking = true;
             isActionable = false;
-            atkTimer = 3;
-            GameObject atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + .1f, transform.position.y - .5f, transform.position.z), Quaternion.identity); //transform to make it a child
-            
-            atkBox1.GetComponent<HitBox>().createBox(10, 2, 1.2f, this);
-           
-            
+            anim.Play("atk1");
             //Instantiate(atkBox1, new Vector3(transform.position.x + .1f, transform.position.y - .5f, transform.position.z), Quaternion.identity);
             
         }
-        if(isAttacking)
-        {
-            atkTimer -= Time.deltaTime;
-        }
-        if(atkTimer < 2)
-        {
-            atkTimer = 0;
-            isAttacking = false;
-            isActionable = true;
-        }
+        if (Input.GetKeyDown(KeyCode.Space))
+            anim.Play("block");
 
+        if(stunTimer > 0)
+        {
+            stunTimer -= Time.deltaTime;
+        } else if (isStun)
+        {
+            isStun = false;
+            resetState();
+            anim.SetBool("exit", true);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Ground")
-        {
-            isGrounded = true;
-        }
         if(collision.gameObject.tag == "Player")
         {
             //collision with other player
@@ -87,18 +92,80 @@ public class Player : MonoBehaviour
 
     void setPlayer(int input)
     {
-        if(input ==1)
+        playerID = input;
+    }
+
+    void makeAtk0()
+    {
+        atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + .7f, transform.position.y - .5f, transform.position.z), Quaternion.identity);
+        atkBox1.GetComponent<HitBox>().createBox(2, 1, 1.35f, this);
+    }
+
+    void makeAtk1()
+    {
+        atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + 1f, transform.position.y -.6f, transform.position.z), Quaternion.identity); //transform to make it a child
+        atkBox1.GetComponent<HitBox>().createBox(10, 3, 1.65f, this);
+    }
+
+    void endAttack()
+    {
+        isAttacking = false;
+        Destroy(atkBox1 );
+    }
+    void makeAction()
+    { //makes a player actionable again
+        isActionable = true;
+    }
+
+    public int getPlayerID()
+    {
+        return playerID;
+    }
+
+    void stun(float dmg)
+    {
+        resetState();
+        isActionable = false;
+        isStun = true;
+
+        anim.SetBool("exit", false);
+        anim.Play("stun");
+        stunTimer = dmg / 10;
+    }
+
+    public void get_hit(float dmg)
+    {
+        Debug.Log(isBlocking + " When got hit " + xD);
+        if (isBlocking)
         {
-            thePlayer = ThisPlayer.player1;
+            dmg *= 0.7f;
+            gameManager.Damage(dmg, playerID);
+            block(dmg);
         }
         else
         {
-            thePlayer = ThisPlayer.player2;
+            gameManager.Damage(dmg, playerID);
+            stun(dmg);
         }
     }
 
-    void makeHitBox()
+    void block(float dmg)
     {
+        resetState();
+        isActionable = false;
+        isBlocking = true;
+        isStun = true; //blockstun
+        stunTimer = dmg / 10;
+        anim.SetBool("exit", false);
+        anim.Play("block");
+        //anim.Play("block")
+    }
 
+    void resetState()
+    {
+        isActionable = true;
+        isAttacking = false;
+        isBlocking = false;
+        isStun = false;
     }
 }

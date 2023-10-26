@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: -5536466355140837349}
   - component: {fileID: -409185643280420533}
   - component: {fileID: 1622243996682160803}
+  - component: {fileID: 6757134292289570765}
   m_Layer: 0
   m_Name: Player_prefab
   m_TagString: Player
@@ -96,7 +97,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7024295637355869291}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -174,8 +175,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 4
-  TEMP_defThisPlayer: 1
+  playerID: 0
   hitbox: {fileID: 8786218389138265030, guid: 343a747049c41e14d968a0db25279518, type: 3}
+  gameManager: {fileID: 0}
+--- !u!95 &6757134292289570765
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7024295637355869291}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 3f55e1ab97232f844977c601b8fe6c60, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7879828395476698120
 GameObject:
   m_ObjectHideFlags: 0
@@ -250,7 +273,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 0.94715035, b: 0, a: 1}
   m_FlipX: 0
@@ -345,7 +368,7 @@ GameObject:
   - component: {fileID: 5746499434750129292}
   - component: {fileID: 9061777354874531790}
   m_Layer: 0
-  m_Name: c811ce1d-b7f1-4477-b0ba-e76c28275ba0
+  m_Name: idle arms
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -360,7 +383,7 @@ Transform:
   m_GameObject: {fileID: 8855246426788201765}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.012000001, y: -0.011000014, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

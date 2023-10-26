@@ -7,6 +7,7 @@ public class EventManager : MonoBehaviour
 {
     public static EventManager instance;
     public MyFEvent e_hit;
+    //public MyFEvent e_dmg;
     [System.Serializable]
     public class MyFEvent : UnityEvent<float>
     {
@@ -24,11 +25,6 @@ public class EventManager : MonoBehaviour
         {
             e_hit = new MyFEvent();
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
         
     }
 }

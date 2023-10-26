@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        EventManager.instance.e_hit.AddListener(Damage);
+        //EventManager.instance.e_hit.AddListener(test);
     }
 
     // Update is called once per frame
@@ -20,9 +20,22 @@ public class GameManager : MonoBehaviour
         
     }
 
-    public void Damage(float i)
+    public void Damage(float f, int i)
     {
-        p1Hp -= i;
-        Debug.Log(p1Hp);
+        if(i == 1)
+        {
+            p1Hp -= f;
+            Debug.Log("P1HP: " +  p1Hp);
+        }
+        else
+        {
+            p2Hp -= f;
+            Debug.Log("P2HP" + p2Hp);
+        }
+    }
+
+    public void test(float f)
+    {
+        Debug.Log("Yes");
     }
 }
