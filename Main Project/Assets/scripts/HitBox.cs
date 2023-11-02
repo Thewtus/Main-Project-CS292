@@ -34,6 +34,7 @@ public class HitBox : MonoBehaviour
             //Debug.Log("INVOKE");
             //EventManager.instance.e_hit.Invoke(damage);
             collision.gameObject.GetComponentInParent<Player>().get_hit(damage);
+            Destroy(gameObject);
         }
     }
 

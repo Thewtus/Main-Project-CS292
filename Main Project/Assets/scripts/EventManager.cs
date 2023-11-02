@@ -7,6 +7,7 @@ public class EventManager : MonoBehaviour
 {
     public static EventManager instance;
     public MyFEvent e_hit;
+    public UnityEvent e_test;
     //public MyFEvent e_dmg;
     [System.Serializable]
     public class MyFEvent : UnityEvent<float>
@@ -25,6 +26,17 @@ public class EventManager : MonoBehaviour
         {
             e_hit = new MyFEvent();
         }
-        
+        if (e_test != null)
+        {
+            e_test = new UnityEvent();
+        }
+        if (e_hit == null)
+        {
+            e_hit = new MyFEvent();
+        }
+        if (e_test == null)
+        {
+            e_test = new UnityEvent();
+        }
     }
 }
