@@ -9,12 +9,13 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] float p1Hp = 100;
-    [SerializeField] float p2Hp = 100;
+    [SerializeField] float p1Hp = 120;
+    [SerializeField] float p2Hp = 120;
     [SerializeField] TextMeshProUGUI timerText;
     [SerializeField] TextMeshProUGUI KOText;
     [SerializeField] TextMeshProUGUI P1Wins;
     [SerializeField] TextMeshProUGUI P2Wins;
+    [SerializeField] GameObject restartButton;
     [SerializeField] GameObject P1HpBar;
     [SerializeField] GameObject P2HpBar;
 
@@ -73,26 +74,31 @@ public class GameManager : MonoBehaviour
             player2.setActionable(true);
             isRoundStart = false;
         }
-        else if (roundTimer > 0)
+        else if (roundTimer > 0 && !(isRoundEnd || isGameEnd))
         {
             roundTimer -= Time.deltaTime;
             timerText.text = (int)roundTimer + "";
         }
-        if(roundTimer <=0 && !isRoundEnd)
+        if(roundTimer <=0 && !(isRoundEnd || isGameEnd))
         {
             timeOut();
         }
 
-        if(isRoundEnd && endTimer > 0)
+        if( (isRoundEnd || isGameEnd) && endTimer > 0)
         {
             endTimer -= Time.deltaTime;
-        } else if (isRoundEnd)
+            player2.setActionable(false);
+            player1.setActionable(false);
+        } else if (isRoundEnd && !isGameEnd)
         {
             SceneManager.LoadScene(0);
+        } else if (isGameEnd)
+        {
+            restartButton.SetActive(true);
         }
 
         //flipping players around
-        if((!flipState && player1.gameObject.transform.position.x >= player2.gameObject.transform.position.x)  || (flipState && player1.gameObject.transform.position.x <= player2.gameObject.transform.position.x))
+        if((!flipState && player1.gameObject.transform.position.x > player2.gameObject.transform.position.x)  || (flipState && player1.gameObject.transform.position.x < player2.gameObject.transform.position.x))
         {
             player2.switchSides();
             player1.switchSides();
@@ -127,8 +133,9 @@ public class GameManager : MonoBehaviour
     void endGame(int p)
     {
         //ends the game, p is winning player
-        player2.setActionable(false);
-        player1.setActionable(false);
+        
+        player2.disableHitBoxes();
+        player1.disableHitBoxes();
         if(p == 1)
         {
             player2.anim.Play("KO");
@@ -143,19 +150,19 @@ public class GameManager : MonoBehaviour
         }
         if(p1RoundWins == 2)
         {
-            KOText.color = Color.blue;
             KOText.text = "P1 WINS";
             isGameEnd = true;
         } else if (p2RoundWins == 2)
         {
-            KOText.color = Color.blue;
             KOText.text = "P2 WINS";
             isGameEnd = true;
-        } else
-        {
-            KOText.gameObject.SetActive(true);
-            isRoundEnd = true;
         }
+        if (isGameEnd)
+        {
+            KOText.color = Color.blue;
+        }
+        KOText.gameObject.SetActive(true);
+        isRoundEnd = true;
         
     }
 
@@ -181,5 +188,12 @@ public class GameManager : MonoBehaviour
     public bool getRoundEnd()
     {
         return isRoundEnd;
+    }
+
+    public void resetButton()
+    {
+        p1RoundWins = 0;
+        p2RoundWins = 0;
+        SceneManager.LoadScene(0);
     }
 }

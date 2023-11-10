@@ -199,6 +199,7 @@ MonoBehaviour:
   playerID: 2
   hitbox: {fileID: 8786218389138265030, guid: 343a747049c41e14d968a0db25279518, type: 3}
   gameManager: {fileID: 0}
+  anim: {fileID: 0}
 --- !u!1 &5843944718493570333
 GameObject:
   m_ObjectHideFlags: 0

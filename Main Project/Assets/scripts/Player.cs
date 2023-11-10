@@ -16,11 +16,13 @@ public class Player : MonoBehaviour
     protected float xMin, xMax;
     //states
     protected bool isActionable = true;
-    protected bool isAttacking, isBlocking, isStun, isRecover, isDown;
-
+    protected bool isAttacking, isBlocking, isStun, isGrab, isEndLag;
+    protected int cancelLevel = 9; //levels for attack cancelling, keeping track of what the player can and can't cancel into
+    protected bool isSwitchQueue = false;
     public Animator anim;
 
     protected GameObject atkBox1;
+    GameObject grabbed_player;
 
     protected float stunTimer;
     protected Vector3 target = Vector3.zero;
@@ -88,8 +90,7 @@ public class Player : MonoBehaviour
     {
         if(collision.gameObject.tag == "Player")
         {
-            //collision with other player
-
+            //behavior for colliding players (if any)
         }
     }
 
@@ -103,7 +104,7 @@ public class Player : MonoBehaviour
         float xOff = 0.7f; //x offset
         float yOff = -0.5f; //y offset
         atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + (xOff * facing), transform.position.y + (yOff), transform.position.z), Quaternion.identity);
-        atkBox1.GetComponent<HitBox>().createBox(3, 1, 1.35f, this);
+        atkBox1.GetComponent<HitBox>().createBox(3, 1, 1.35f, this, 1);
     }
 
     void makeAtk1()
@@ -111,29 +112,51 @@ public class Player : MonoBehaviour
         float xOff = 1f; //x offset
         float yOff = -0.6f; //y offset
         atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + (xOff * facing), transform.position.y + (yOff), transform.position.z), Quaternion.identity);
-        atkBox1.GetComponent<HitBox>().createBox(10, 3, 1.65f, this);
+        atkBox1.GetComponent<HitBox>().createBox(10, 3, 1.65f, this, 2);
     }
 
+    void makeAtk11()
+    {
+        //called atk11 because it still uses the fire2 key
+        float xOff = 1f; //x offset
+        float yOff = -1f; //y offset
+        atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + (xOff * facing), transform.position.y + (yOff), transform.position.z), Quaternion.identity);
+        atkBox1.GetComponent<HitBox>().createBoxKnock(11, 1.5f, 1, this, 2);
+    }
+
+    void setupAtk2()
+    {
+        target = new Vector3(transform.position.x + (4.5f * facing), transform.position.y, transform.position.z);
+    }
     void makeAtk2()
     {
         float xOff = 1f;
         float yOff = -.6f;
         atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + (xOff * facing), transform.position.y + (yOff), transform.position.z), Quaternion.identity);
-        atkBox1.GetComponent<HitBox>().createBox(16, 3, 1.65f, this);
-        target = new Vector3(transform.position.x + (5 * facing), transform.position.y, transform.position.z);
+        atkBox1.GetComponent<HitBox>().createBox(16, 2.7f, 1.65f, this, 9);
+        //target = new Vector3(transform.position.x + (5 * facing), transform.position.y, transform.position.z);
         //Debug.Log("ran makeAtk2: " + target.ToString());
+    }
+
+    void makeGrabAtk()
+    {
+        float xOff = 0.25f;
+        float yOff = -0.5f;
+        atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + (xOff * facing), transform.position.y + (yOff), transform.position.z), Quaternion.identity);
+        atkBox1.GetComponent<HitBox>().createGrabBox(9, 1, 1.35f, this);
     }
 
     void endAttack()
     {
         isAttacking = false;
-        Destroy(atkBox1 );
-        target = Vector3.zero;
-        //Debug.Log("ended attack");
+        Destroy(atkBox1);
+        isEndLag = true;
     }
     void makeAction()
     { //makes a player actionable again
         isActionable = true;
+        isEndLag = false;
+        target = Vector3.zero;
     }
 
     public int getPlayerID()
@@ -141,21 +164,16 @@ public class Player : MonoBehaviour
         return playerID;
     }
 
-    void stun(float dmg)
+    public void stun(float dmg)
     {
         resetState();
         isActionable = false;
         isStun = true;
-
+        //cancelLevel = 9;
         anim.SetBool("exit", false);
         anim.Play("stun");
         stunTimer = (.3f - dmg / 100) + (Mathf.Pow(dmg, 2) / 1000);
-        float knockback = dmg / 30 * facing * -1;
-        transform.position += new Vector3(knockback, 0, 0);
-        if (transform.position.x < xMin || transform.position.x > xMax)
-        { //collision with sides
-            transform.position -= new Vector3(knockback, 0, 0);
-        }
+        target = new Vector3(transform.position.x + (dmg / 10 * facing * -1), transform.position.y, transform.position.z);
     }
 
     public void get_hit(float dmg)
@@ -182,26 +200,53 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void grab(float dmg, GameObject otherPlayer)
+    {
+        anim.Play("grab_finish");
+        otherPlayer.GetComponentInParent<Animator>().SetBool("exit", false);
+        otherPlayer.GetComponentInParent<Animator>().Play("stun");
+        otherPlayer.GetComponentInParent<Player>().setActionable(false);
+        grabbed_player = otherPlayer;
+    }
+
+    public void grab_finish(float dmg)
+    {
+        gameManager.Damage(dmg, grabbed_player.GetComponentInParent<Player>().getPlayerID());
+        grabbed_player.GetComponentInParent<Player>().knockDown();
+        /**Transform pfb = grabbed_player.GetComponentInParent<Transform>();
+        Vector3 t = new Vector3(pfb.position.x + (.6f * facing), pfb.position.y, pfb.position.z);
+        grabbed_player.GetComponentInParent<Player>().setTarget(t);**/
+    }
+
     void block(float dmg)
     {
         resetState();
         isActionable = false;
         isBlocking = true;
         isStun = true; //blockstun
-        stunTimer = dmg / 10;
+        stunTimer = (.3f - dmg / 80) + (Mathf.Pow(dmg, 2) / 1000);
         anim.SetBool("exit", false);
         if (facing == 1)
             anim.Play("block");
         else
             anim.Play("block_right");
 
-        float knockback = dmg / 20 * facing * -1;
-        transform.position += new Vector3(knockback, 0, 0);
-        if (transform.position.x < xMin || transform.position.x > xMax)
+        //float knockback = dmg / 10 * facing * -1;
+        target = new Vector3(transform.position.x + (dmg / 12 * facing * -1), transform.position.y, transform.position.z);
+        //transform.position += new Vector3(knockback, 0, 0);
+        /**if (transform.position.x < xMin || transform.position.x > xMax)
         { //collision with sides
             transform.position -= new Vector3(knockback, 0, 0);
-        }
-        //anim.Play("block")
+        }**/
+        
+    }
+
+    public void knockDown()
+    {
+        resetState();
+        isActionable = false;
+        if(!gameManager.getRoundEnd())
+            anim.Play("knockdown");
     }
 
     protected void resetState()
@@ -209,27 +254,65 @@ public class Player : MonoBehaviour
         isActionable = true;
         isAttacking = false;
         isBlocking = false;
+        isEndLag = false;
+        isGrab = false;
         isStun = false;
         Destroy(atkBox1);
         target = Vector3.zero;
+        cancelLevel = 9;
+        anim.SetBool("exit", true);
     }
 
     public void switchSides()
     {
-        facing *= -1;
-        
-        foreach (SpriteRenderer child in gameObject.GetComponentsInChildren<SpriteRenderer>())
+        if(!isActionable)
         {
-            child.flipX = !child.flipX;
+            isSwitchQueue = !isSwitchQueue;
         }
+        else
+        {
+            facing *= -1;
+
+            foreach (SpriteRenderer child in gameObject.GetComponentsInChildren<SpriteRenderer>())
+            {
+                child.flipX = !child.flipX;
+            }
+            isSwitchQueue = false;
+        }
+        
     }
 
     public void setActionable(bool a)
     {
+        //resetState();
         isActionable = a;
     }
+    public void setTarget(Vector3 v)
+    {
+        target = v;
+    }
+    public bool getIsActionable()
+    {
+        return isActionable;
+    }
 
-    void disableHitBoxes()
+    public bool getIsAttacking()
+    {
+        return isAttacking;
+    }
+
+    public bool getIsBlocking()
+    {
+        return isBlocking;
+    }
+
+    public bool IsGrabbable()
+    {
+        //returns if the player meets conditions for being grabbed
+        return isActionable || isAttacking || isEndLag;
+    }
+
+    public void disableHitBoxes()
     {
         isActionable = false;
         isStun = false;
@@ -237,5 +320,24 @@ public class Player : MonoBehaviour
         {
             hBox.SetActive(false);
         }
+    }
+
+    public void enableHitBoxes()
+    {
+        isActionable = true;
+        foreach (GameObject hBox in GameObject.FindGameObjectsWithTag("HurtBox"))
+        {
+            hBox.SetActive(true);
+        }
+        
+    }
+
+    public int getCancelLevel()
+    {
+        return cancelLevel;
+    }
+    public void setCancelLevel(int i)
+    {
+        cancelLevel = i;
     }
 }

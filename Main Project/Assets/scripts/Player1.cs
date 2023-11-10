@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player1 : Player
@@ -26,7 +27,8 @@ public class Player1 : Player
         //movement:
         if (isActionable)
         {
-            if(xDirection * facing > 0)
+            cancelLevel = 9;
+            if (xDirection * facing > 0)
             {
                 transform.position += new Vector3(xDirection, 0, 0) * Time.deltaTime * speed;
             } else
@@ -51,7 +53,7 @@ public class Player1 : Player
             isBlocking = false; //don't allow blocking while stunned or attacking
         }
         //Debug.Log(isBlocking + " " + xDirection);
-        if (Input.GetButtonDown("Fire0") && isActionable)
+        if (Input.GetButtonDown("Fire0") && (isActionable || cancelLevel < 2) )
         {
             isAttacking = true;
             isActionable = false;
@@ -61,25 +63,40 @@ public class Player1 : Player
                 anim.Play("atk0_right");
             //anim.Play("atk0");
         }
-        if (Input.GetButtonDown("Fire1") && isActionable)
+        if (Input.GetButtonDown("Fire1") && xDirection * facing <= 0 && (isActionable || cancelLevel < 3))
         {
             isAttacking = true;
             isActionable = false;
             anim.Play("atk1");
+            cancelLevel = 9;
         }
-        if (Input.GetButtonDown("Fire2") && isActionable)
+        if (Input.GetButtonDown("Fire1") && xDirection * facing > 0 && (isActionable || cancelLevel < 3))
+        {
+            isAttacking = true;
+            isActionable = false;
+            anim.Play("atk11");
+            cancelLevel = 9;
+        }
+
+        if (Input.GetButtonDown("Fire2") && (isActionable || cancelLevel < 4))
         {
             isAttacking = true;
             isActionable = false;
             anim.Play("atk2");
+            cancelLevel = 9;
         } else if (target != Vector3.zero && !isStun)
         {
-            //Debug.Log("Running the movement");
-            transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime * 4); //hopefully moves?
+            //Movement during atk2
+            transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime * 2.2f); //hopefully moves?
             if(atkBox1 != null)
             {
-                atkBox1.transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime * 5);
+                atkBox1.transform.position = Vector3.MoveTowards(atkBox1.transform.position, target, speed * Time.deltaTime * 2.2f);
             }
+        }
+        if(Input.GetButtonDown("Fire3") && isActionable)
+        {
+            isActionable = false;
+            anim.Play("grab");
         }
 
         if (stunTimer > 0)
@@ -91,6 +108,14 @@ public class Player1 : Player
             isStun = false;
             resetState();
             anim.SetBool("exit", true);
+        }
+        if(isStun && target != Vector3.zero)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime * 0.9f); //hopefully moves?
+        }
+        if(isSwitchQueue && isActionable)
+        {
+            switchSides();
         }
     }
 }
