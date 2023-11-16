@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class HitBox : MonoBehaviour
 {
+    //all hitboxes for attacks and grabs
     [SerializeField] GameManager gameManager;
     public float damage = 1;
     private Player parent;

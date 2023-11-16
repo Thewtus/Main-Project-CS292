@@ -19,8 +19,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject P1HpBar;
     [SerializeField] GameObject P2HpBar;
 
-
-
     [SerializeField] Player1 player1;
     [SerializeField] Player2 player2;
     float roundTimer = 99;

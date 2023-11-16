@@ -9,6 +9,8 @@ using static UnityEngine.GraphicsBuffer;
 
 public class Player : MonoBehaviour
 {
+    //Parent function for the two player classes (which only differ in the controls in the update function)
+
     [SerializeField] protected float speed = 5;
     [SerializeField] protected int playerID;
     [SerializeField] protected GameObject hitbox;
@@ -21,6 +23,7 @@ public class Player : MonoBehaviour
     protected bool isSwitchQueue = false;
     public Animator anim;
 
+    //objects
     protected GameObject atkBox1;
     GameObject grabbed_player;
 
@@ -42,48 +45,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /**float xDirection = Input.GetAxis("Horizontal");
-        //movement:
-        if(isActionable)
-            transform.position += new Vector3(xDirection, 0, 0) * Time.deltaTime * speed;
-        
-        if (transform.position.x < xMin || transform.position.x > xMax)
-        { //collision with sides
-            transform.position -= new Vector3(xDirection, 0, 0) * Time.deltaTime * speed;
-        }
-        
-        
-        isBlocking = (xDirection * facing) < 0; //checking for blocking, if moving backwards, block
-        //Debug.Log(isBlocking + " " + xDirection);
-        if(Input.GetButtonDown("Fire0") && isActionable)
-        {
-            isAttacking = true;
-            isActionable = false;
-            if (facing < 0)
-                anim.Play("atk0");
-            else
-                anim.Play("atk0_right");
-        }
-        if(Input.GetButtonDown("Fire1") && isActionable)
-        {
-            isAttacking = true;
-            isActionable = false;
-            anim.Play("atk1");
-            //Instantiate(atkBox1, new Vector3(transform.position.x + .1f, transform.position.y - .5f, transform.position.z), Quaternion.identity);
-            
-        }
-        if (Input.GetKeyDown(KeyCode.Space))
-            switchSides();
-
-        if(stunTimer > 0)
-        {
-            stunTimer -= Time.deltaTime;
-        } else if (isStun)
-        {
-            isStun = false;
-            resetState();
-            anim.SetBool("exit", true);
-        }**/
+        //exists in subclasses
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -100,7 +62,7 @@ public class Player : MonoBehaviour
     }
 
     void makeAtk0()
-    {
+    { 
         float xOff = 0.7f; //x offset
         float yOff = -0.5f; //y offset
         atkBox1 = Instantiate(hitbox, new Vector3(transform.position.x + (xOff * facing), transform.position.y + (yOff), transform.position.z), Quaternion.identity);
@@ -211,6 +173,7 @@ public class Player : MonoBehaviour
 
     public void grab_finish(float dmg)
     {
+        //needs to work like this for the animations
         gameManager.Damage(dmg, grabbed_player.GetComponentInParent<Player>().getPlayerID());
         grabbed_player.GetComponentInParent<Player>().knockDown();
         /**Transform pfb = grabbed_player.GetComponentInParent<Transform>();

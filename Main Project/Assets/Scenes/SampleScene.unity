@@ -1388,7 +1388,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.0548, y: -4.61, z: 0}
-  m_LocalScale: {x: 18.30064, y: 1.3407115, z: 1}
+  m_LocalScale: {x: 18.30064, y: 1.357, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1602,7 +1602,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -1980,6 +1980,18 @@ PrefabInstance:
     - target: {fileID: 5327053031226362204, guid: 532153142e288bf4991ec5cb15455f28, type: 3}
       propertyPath: m_Name
       value: P2_Player_prefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 5466675046543576816, guid: 532153142e288bf4991ec5cb15455f28, type: 3}
+      propertyPath: m_Color.b
+      value: 0.75686276
+      objectReference: {fileID: 0}
+    - target: {fileID: 5466675046543576816, guid: 532153142e288bf4991ec5cb15455f28, type: 3}
+      propertyPath: m_Color.g
+      value: 0.75686276
+      objectReference: {fileID: 0}
+    - target: {fileID: 5466675046543576816, guid: 532153142e288bf4991ec5cb15455f28, type: 3}
+      propertyPath: m_Color.r
+      value: 0.75686276
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

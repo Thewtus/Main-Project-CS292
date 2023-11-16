@@ -96,6 +96,7 @@ public class Player1 : Player
         if(Input.GetButtonDown("Fire3") && isActionable)
         {
             isActionable = false;
+            isGrab = true;
             anim.Play("grab");
         }
 

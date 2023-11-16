@@ -98,6 +98,7 @@ public class Player2 : Player
         if (Input.GetKeyDown(KeyCode.KeypadEnter) && isActionable)
         {
             isActionable = false;
+            isGrab = true;
             anim.Play("grab");
         }
 
